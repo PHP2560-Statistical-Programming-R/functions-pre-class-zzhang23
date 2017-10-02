@@ -1,6 +1,6 @@
 ---
 title: "Functions - Pre-Class Work"
-author: "Adam J Sullivan"
+author: "Ze Zhang"
 date: "September 29, 2017"
 output: html_document
 ---
@@ -21,7 +21,7 @@ Standardizing a variable means subtracting the mean, and then dividing by the st
 ```{R}
 
 suppressMessages(library(foreign))
-wcgs <- read.dta("https://drive.google.com/uc?export=download&id=0B8CsRLdwqzbzYWxfN3ExQllBQkU")
+wcgs <- read.dta("/Users/zezhang/Desktop/wcgs2.dta")
 ```
 
 The data has the following variables:
@@ -96,9 +96,32 @@ bmi     Body Mass Index
 ### Question 1: Standardize Function
 
 A. Create a function called standardize.me() that takes a numeric vector as an argument, and returns the standardized version of the vector. 
+```{r}
+standardize.me<-function(x){(x-mean(x,na.rm = TRUE))/sd(x,na.rm = TRUE)}
+```
 B. Assign all the numeric columns of the original WCGS dataset to a new dataset called WCGS.new.
+```{r}
+library(dplyr)
+WCGS.new<- wcgs %>% select_if(is.numeric)
+```
 C. Using a loop and your new function, standardize all the variables WCGS.new dataset.
+```{r}
+for (i in 1:length(WCGS.new)) {WCGS.new[[i]]<-standardize.me(WCGS.new[[i]])
+  
+}
+```
 D. What should the mean and standard deviation of all your new standardized variables be? Test your prediction by running a loop
+```{r}
+# mean should be 0, sd should be 1
+mean_WCGS.new<-c()
+sd_WCGS.new<-c()
+for (i in 1:length(WCGS.new)) {mean_WCGS.new[i]<-mean(WCGS.new[[i]],na.rm = TRUE) 
+sd_WCGS.new[i]<-sd(WCGS.new[[i]],na.rm = TRUE)
+  
+}
+mean_WCGS.new
+sd_WCGS.new
+```
 
 
 
@@ -106,5 +129,24 @@ D. What should the mean and standard deviation of all your new standardized vari
 ### Question 2: Looping to Calculate
 
 A. Using a loop, calculate the mean weight of the subjects separated by the type of CHD they have.
+```{r}
+no_chd<-c()
+miorsd<-c()
+angina<-c()
+silentmi<-c()
+for (i in 1:nrow(wcgs)) {if(wcgs$typchd69[[i]]=="no CHD"){no_chd[[i]]<-wcgs$weight[[i]]}
+  else if(wcgs$typchd69[[i]]=="MI or SD"){miorsd[[i]]<-wcgs$weight[[i]]}
+  else if(wcgs$typchd69[[i]]=="angina"){angina[[i]]<-wcgs$weight[[i]]}
+  else {silentmi[[i]]<-wcgs$weight[[i]]}
+  
+}
+mean(no_chd,na.rm=TRUE)
+mean(miorsd,na.rm=TRUE)
+mean(angina,na.rm=TRUE)
+mean(silentmi,na.rm=TRUE)
+```
 B. Now do the same thing, but now don’t use a loop
-
+```{r}
+library(dplyr)
+wcgs %>% group_by(typchd69) %>% summarise(mean_weight=mean(weight,na.rm=TRUE))
+```
